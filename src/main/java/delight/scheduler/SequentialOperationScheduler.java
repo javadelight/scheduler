@@ -21,7 +21,7 @@ import java.util.Queue;
 public final class SequentialOperationScheduler {
 
     private static final boolean ENABLE_LOG = false;
-    private static final boolean ENABLE_METRICS = true;
+    private static final boolean ENABLE_METRICS = false;
 
     @SuppressWarnings("rawtypes")
     private final Queue<OperationEntry> scheduled;
@@ -46,6 +46,8 @@ public final class SequentialOperationScheduler {
     private final Object owner;
 
     private final TimeoutWatcher timeoutWatcher;
+
+    private volatile long totalRuntime;
 
     public boolean isRunning() {
 
@@ -210,7 +212,7 @@ public final class SequentialOperationScheduler {
             System.out.println(this + ": Execute operation " + entryClosed.operation);
         }
 
-        long startTmp;
+        long startTmp = 0;
 
         if (ENABLE_METRICS) {
             startTmp = System.currentTimeMillis();
@@ -258,6 +260,7 @@ public final class SequentialOperationScheduler {
                     }
 
                     if (ENABLE_METRICS) {
+                        totalRuntime += System.currentTimeMillis() - start;
                         // MetricsCommon.get()
                         // .record(MetricsCommon.value("scheduler." + owner,
                         // System.currentTimeMillis() - start));
@@ -342,8 +345,10 @@ public final class SequentialOperationScheduler {
 
     }
 
-    private final void performShutdown() {
+    static volatile long total;
 
+    private final void performShutdown() {
+        final long start = System.currentTimeMillis();
         final List<Operation<Success>> ops = new ArrayList<Operation<Success>>(4);
 
         ops.add(new Operation<Success>() {
@@ -367,6 +372,9 @@ public final class SequentialOperationScheduler {
 
             @Override
             public void apply(final ValueCallback<Success> callback) {
+                total += System.currentTimeMillis() - start;
+
+                System.out.println(total);
                 timeoutWatcher.shutdown(AsyncCommon.asSimpleCallback(callback));
             }
 
@@ -376,6 +384,10 @@ public final class SequentialOperationScheduler {
 
             @Override
             public void apply(final List<Success> o) {
+                if (ENABLE_METRICS) {
+                    System.out.println(this + ": Runtime for " + owner + " = " + totalRuntime);
+                }
+
                 if (shutDown.compareAndSet(false, true)) {
 
                     shutdownCallback.get().onSuccess(Success.INSTANCE);
@@ -406,9 +418,9 @@ public final class SequentialOperationScheduler {
 
         this.shuttingDown = concurrency.newAtomicBoolean(false);
         this.shutdownCallback = new Value<ValueCallback<Success>>(null);
-        this.operationExecutor = concurrency.newExecutor().newSingleThreadExecutor(owner);
 
-        this.callbackExecutor = concurrency.newExecutor().newParallelExecutor(10, owner);
+        this.operationExecutor = concurrency.newExecutor().newSingleThreadExecutor(owner);
+        this.callbackExecutor = concurrency.newExecutor().newParallelExecutor(0, 5, owner);
 
         this.suspendCount = concurrency.newAtomicInteger(0);
         this.operationInProgress = concurrency.newAtomicBoolean(false);
