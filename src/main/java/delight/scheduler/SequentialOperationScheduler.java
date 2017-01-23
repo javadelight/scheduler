@@ -372,9 +372,7 @@ public final class SequentialOperationScheduler {
 
             @Override
             public void apply(final ValueCallback<Success> callback) {
-                total += System.currentTimeMillis() - start;
 
-                System.out.println(this + " total time for shutdown " + total);
                 timeoutWatcher.shutdown(AsyncCommon.asSimpleCallback(callback));
             }
 
@@ -392,6 +390,10 @@ public final class SequentialOperationScheduler {
 
                     shutdownCallback.get().onSuccess(Success.INSTANCE);
                 }
+
+                total += System.currentTimeMillis() - start;
+
+                System.out.println(this + " total time for shutdown " + total);
             }
         }));
 
