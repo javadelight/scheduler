@@ -374,7 +374,7 @@ public final class SequentialOperationScheduler {
             public void apply(final ValueCallback<Success> callback) {
                 total += System.currentTimeMillis() - start;
 
-                System.out.println(total);
+                System.out.println(this + " total time for shutdown " + total);
                 timeoutWatcher.shutdown(AsyncCommon.asSimpleCallback(callback));
             }
 
