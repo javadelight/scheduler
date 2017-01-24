@@ -345,10 +345,8 @@ public final class SequentialOperationScheduler {
 
     }
 
-    static volatile long total;
-
     private final void performShutdown() {
-        final long start = System.currentTimeMillis();
+
         final List<Operation<Success>> ops = new ArrayList<Operation<Success>>(4);
 
         ops.add(new Operation<Success>() {
@@ -391,9 +389,6 @@ public final class SequentialOperationScheduler {
                     shutdownCallback.get().onSuccess(Success.INSTANCE);
                 }
 
-                total += System.currentTimeMillis() - start;
-
-                System.out.println(this + " total time for shutdown " + total);
             }
         }));
 
