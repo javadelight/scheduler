@@ -3,7 +3,7 @@
 
 	<groupId>org.javadelight</groupId>
 	<artifactId>delight-scheduler</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<description>Tools for scheduling operations in sequence or in parallel.</description>
 	<url>https://github.com/javadelight/scheduler</url>
 	<properties>
