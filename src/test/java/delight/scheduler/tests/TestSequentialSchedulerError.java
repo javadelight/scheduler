@@ -65,6 +65,14 @@ public class TestSequentialSchedulerError {
 
         });
 
+        Async.waitFor(new Operation<Success>() {
+
+            @Override
+            public void apply(final ValueCallback<Success> callback) {
+                scheduler.shutdown(callback);
+            }
+        });
+
     }
 
     /**
@@ -130,6 +138,14 @@ public class TestSequentialSchedulerError {
 
             }
 
+        });
+
+        Async.waitFor(new Operation<Success>() {
+
+            @Override
+            public void apply(final ValueCallback<Success> callback) {
+                scheduler.shutdown(callback);
+            }
         });
 
     }
