@@ -122,18 +122,26 @@ public final class SequentialOperationScheduler {
             System.out.println(this + ": Test run required. Is in progress: " + operationInProgress.get());
         }
 
-        final long lastRunVal = lastRun.get();
-        if (lastRunVal != -1) {
-            final long now = System.currentTimeMillis();
-            if (now - lastRunVal > timeout) {
-                operationInProgress.set(false);
-                System.err.println(SequentialOperationScheduler.this + ": Scheduler timed out [" + this.owner + "]");
-            }
-        }
-
         if (!operationInProgress.compareAndSet(false, true)) {
+            final long lastRunVal = lastRun.get();
+            if (lastRunVal != -1) {
+                final long now = System.currentTimeMillis();
+                lastRun.set(-1);
+                if (now - lastRunVal > timeout) {
+                    operationInProgress.set(false);
+                    System.err
+                            .println(SequentialOperationScheduler.this + ": Scheduler timed out [" + this.owner + "]");
+                    performRun();
+                }
+            }
+
             return;
         }
+        performRun();
+
+    }
+
+    private void performRun() {
         if (ENABLE_LOG) {
             System.out.println(this + ": Perform run. Is in progress: " + operationInProgress.get());
         }
@@ -164,7 +172,6 @@ public final class SequentialOperationScheduler {
 
             });
         }
-
     }
 
     private final void executeWithTimeout(final OperationEntry<Object> entry) {
@@ -203,6 +210,7 @@ public final class SequentialOperationScheduler {
                     }
 
                     operationInProgress.set(false);
+                    // lastRun.set(-1);
 
                     runIfRequired(true);
 
