@@ -388,6 +388,10 @@ public final class SequentialOperationScheduler {
         return scheduled.size();
     }
 
+    public Concurrency getConcurrency() {
+        return this.concurrency;
+    }
+
     public SequentialOperationScheduler(final Object owner, final Concurrency concurrency) {
         super();
         assert concurrency != null;
