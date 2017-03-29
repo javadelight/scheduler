@@ -106,9 +106,6 @@ public final class SequentialOperationScheduler {
 
     }
 
-    // TODO can this method be improved (made more efficient, easier to
-    // understand?
-    @SuppressWarnings("unchecked")
     private final void runIfRequired(final boolean forceOwnThread) {
 
         if (suspendCount.get() > 0) {
@@ -129,6 +126,7 @@ public final class SequentialOperationScheduler {
                 lastRun.set(-1);
                 if (now - lastRunVal > timeout) {
                     operationInProgress.set(false);
+
                     System.err
                             .println(SequentialOperationScheduler.this + ": Scheduler timed out [" + this.owner + "]");
                     performRun();
@@ -141,6 +139,7 @@ public final class SequentialOperationScheduler {
 
     }
 
+    @SuppressWarnings("unchecked")
     private void performRun() {
         if (ENABLE_LOG) {
             System.out.println(this + ": Perform run. Is in progress: " + operationInProgress.get());
