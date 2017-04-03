@@ -5,7 +5,6 @@ import delight.async.Operation;
 import delight.async.Value;
 import delight.async.callbacks.ValueCallback;
 import delight.concurrency.Concurrency;
-import delight.concurrency.internal.schedule.OperationEntry;
 import delight.concurrency.wrappers.SimpleAtomicBoolean;
 import delight.concurrency.wrappers.SimpleAtomicInteger;
 import delight.concurrency.wrappers.SimpleAtomicLong;
@@ -89,7 +88,7 @@ public final class SequentialOperationScheduler {
         if (ENABLE_LOG) {
             System.out.println(this + ": Add operation " + operation);
         }
-        scheduled.add(new OperationEntry<Object>((Operation<Object>) operation, new ValueCallback<Object>() {
+        scheduled.add(new OperationEntry<Object>((Operation<Object>) operation, 0, new ValueCallback<Object>() {
 
             @Override
             public void onFailure(final Throwable t) {
@@ -124,11 +123,19 @@ public final class SequentialOperationScheduler {
             if (lastRunVal != -1) {
                 final long now = System.currentTimeMillis();
                 lastRun.set(-1);
+
+                if (ENABLE_LOG) {
+                    System.out.println(this + ": Duration of last pending operation " + (now - lastRunVal));
+                }
+
                 if (now - lastRunVal > timeout) {
                     operationInProgress.set(false);
 
                     System.err
                             .println(SequentialOperationScheduler.this + ": Scheduler timed out [" + this.owner + "]");
+                    currentOperation.get().callback.onFailure(new Exception("Opration timed out."));
+                    currentOperation.set(null);
+
                     performRun();
                 }
             }
@@ -181,7 +188,6 @@ public final class SequentialOperationScheduler {
             return;
         }
 
-        currentOperation.set(entry);
     }
 
     private void executeOperation(final OperationEntry<Object> entryClosed,
@@ -199,7 +205,7 @@ public final class SequentialOperationScheduler {
 
         final long start = startTmp;
         try {
-
+            currentOperation.set(entryClosed);
             entryClosed.operation.apply(new ValueCallback<Object>() {
 
                 @Override
@@ -244,6 +250,15 @@ public final class SequentialOperationScheduler {
                         // MetricsCommon.get()
                         // .record(MetricsCommon.value("scheduler." + owner,
                         // System.currentTimeMillis() - start));
+                    }
+
+                    if (currentOperation.get() != entryClosed) {
+
+                        System.err.println(SequentialOperationScheduler.this
+                                + ": Don't call callback since operation was cancelled and onFailure already called: "
+                                + entryClosed.operation);
+
+                        return;
                     }
 
                     operationInProgress.set(false);

@@ -5,8 +5,6 @@ import delight.concurrency.Concurrency;
 import delight.concurrency.schedule.SingleInstanceThread;
 import delight.concurrency.schedule.Step;
 import delight.concurrency.schedule.ThreadSpace;
-import delight.concurrency.schedule.SingleInstanceThread.Notifiyer;
-import delight.concurrency.schedule.SingleInstanceThread.ThreadStoppedCallback;
 import delight.concurrency.wrappers.SimpleAtomicBoolean;
 import delight.concurrency.wrappers.SimpleExecutor;
 import delight.concurrency.wrappers.SimpleLock;
@@ -120,9 +118,9 @@ public class BetterAccessThreadImplementation implements AccessThread {
             processItems(items);
         } finally {
             releaseMutex();
-        }
 
-        callWhenFinished.notifiyFinished();
+            callWhenFinished.notifiyFinished();
+        }
 
     }
 

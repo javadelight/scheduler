@@ -27,6 +27,7 @@ public class TestTimeout {
 
                     @Override
                     public void apply(final ValueCallback<Success> callback) {
+
                         try {
                             Thread.sleep(500);
                         } catch (final InterruptedException e) {

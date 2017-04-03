@@ -127,6 +127,8 @@ public abstract class SingleInstanceQueueWorker<GItem> {
     public SingleInstanceQueueWorker(final Object owner, final Queue<GItem> queue, final Concurrency con) {
         this.con = con;
         this.thread = new SequentialOperationScheduler(owner, con);
+        this.thread.setEnforceOwnThread(true);
+        this.thread.setTimeout(120000);
         this.queue = queue;
     }
 
