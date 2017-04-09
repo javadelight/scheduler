@@ -22,7 +22,7 @@ public final class ParallelRequestTimeEnforcer {
 
         for (final OperationEntry<Object> currentOperation : currentOperations) {
             final long duration = now - currentOperation.startTime;
-            System.out.println(duration);
+
             if (duration > timeout) {
                 toDelete.add(currentOperation);
                 currentOperation.callback

@@ -47,6 +47,8 @@ public final class SequentialOperationScheduler {
 
     private volatile long totalRuntime;
 
+    private boolean enableLog;
+
     public boolean isRunning() {
 
         return operationInProgress.get();
@@ -85,7 +87,7 @@ public final class SequentialOperationScheduler {
             throw new IllegalStateException("Trying to schedule operation for shutting down scheduler.");
         }
 
-        if (ENABLE_LOG) {
+        if (ENABLE_LOG || enableLog) {
             System.out.println(this + ": Add operation " + operation);
         }
         scheduled.add(new OperationEntry<Object>((Operation<Object>) operation, 0, new ValueCallback<Object>() {
@@ -108,32 +110,34 @@ public final class SequentialOperationScheduler {
     private final void runIfRequired(final boolean forceOwnThread) {
 
         if (suspendCount.get() > 0) {
-            if (ENABLE_LOG) {
+            if (ENABLE_LOG || enableLog) {
                 System.out.println(this + ": Is suspended ...");
             }
             return;
         }
 
-        if (ENABLE_LOG) {
+        if (ENABLE_LOG || enableLog) {
             System.out.println(this + ": Test run required. Is in progress: " + operationInProgress.get());
         }
 
         if (!operationInProgress.compareAndSet(false, true)) {
             final long lastRunVal = lastRun.get();
+            if (ENABLE_LOG || enableLog) {
+                System.out.println(this + ": Last Run " + lastRunVal);
+            }
             if (lastRunVal != -1) {
                 final long now = System.currentTimeMillis();
-                lastRun.set(-1);
 
-                if (ENABLE_LOG) {
+                if (ENABLE_LOG || enableLog) {
                     System.out.println(this + ": Duration of last pending operation " + (now - lastRunVal));
                 }
 
                 if (now - lastRunVal > timeout) {
                     operationInProgress.set(false);
-
+                    lastRun.set(-1);
                     System.err
                             .println(SequentialOperationScheduler.this + ": Scheduler timed out [" + this.owner + "]");
-                    currentOperation.get().callback.onFailure(new Exception("Opration timed out."));
+                    currentOperation.get().callback.onFailure(new Exception("Operation timed out."));
                     currentOperation.set(null);
 
                     performRun();
@@ -148,7 +152,7 @@ public final class SequentialOperationScheduler {
 
     @SuppressWarnings("unchecked")
     private void performRun() {
-        if (ENABLE_LOG) {
+        if (ENABLE_LOG || enableLog) {
             System.out.println(this + ": Perform run. Is in progress: " + operationInProgress.get());
         }
 
@@ -193,7 +197,7 @@ public final class SequentialOperationScheduler {
     private void executeOperation(final OperationEntry<Object> entryClosed,
             final SimpleAtomicBoolean operationCompleted) {
 
-        if (ENABLE_LOG) {
+        if (ENABLE_LOG || enableLog) {
             System.out.println(this + ": Execute operation " + entryClosed.operation);
         }
 
@@ -210,7 +214,7 @@ public final class SequentialOperationScheduler {
 
                 @Override
                 public void onFailure(final Throwable t) {
-                    if (ENABLE_LOG) {
+                    if (ENABLE_LOG || enableLog) {
                         System.out.println(this + ": Operation failed: " + entryClosed.operation);
                     }
 
@@ -240,7 +244,7 @@ public final class SequentialOperationScheduler {
 
                 @Override
                 public void onSuccess(final Object value) {
-                    if (ENABLE_LOG) {
+                    if (ENABLE_LOG || enableLog) {
                         System.out.println(
                                 SequentialOperationScheduler.this + ": Operation successful: " + entryClosed.operation);
                     }
@@ -314,7 +318,7 @@ public final class SequentialOperationScheduler {
 
     private final void tryShutdown() {
 
-        if (ENABLE_LOG) {
+        if (ENABLE_LOG || enableLog) {
             System.out.println(this + "->" + owner + ": Attempting shutdown .. ");
         }
 
@@ -322,13 +326,13 @@ public final class SequentialOperationScheduler {
             return;
         }
 
-        if (ENABLE_LOG) {
+        if (ENABLE_LOG || enableLog) {
             System.out.println(
                     this + "->" + owner + ": Attempting shutdown; running state: " + operationInProgress.get());
         }
         if (operationInProgress.get() == false) {
 
-            if (ENABLE_LOG) {
+            if (ENABLE_LOG || enableLog) {
                 System.out.println(this + "->" + owner + ": Attempting shutdown; still scheduled: " + scheduled.size());
             }
             if (scheduled.isEmpty()) {
@@ -396,6 +400,10 @@ public final class SequentialOperationScheduler {
 
     public void setEnforceOwnThread(final boolean value) {
         this.enforceOwnThread = value;
+    }
+
+    public void setEnableLog(final boolean enableLog) {
+        this.enableLog = enableLog;
     }
 
     public int scheduledCount() {
