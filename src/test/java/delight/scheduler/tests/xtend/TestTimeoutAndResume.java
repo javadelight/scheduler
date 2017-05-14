@@ -59,7 +59,8 @@ public class TestTimeoutAndResume {
               cb.onSuccess(Success.INSTANCE);
             }
           };
-          scheduler.<Success>schedule(_function_1, AsyncCommon.<Success>embed(cb, _function_2));
+          ValueCallback<Success> _embed = AsyncCommon.<Success>embed(cb, _function_2);
+          scheduler.<Success>schedule(_function_1, _embed);
         } catch (Throwable _e) {
           throw Exceptions.sneakyThrow(_e);
         }
