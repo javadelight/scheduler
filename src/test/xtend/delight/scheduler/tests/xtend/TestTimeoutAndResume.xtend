@@ -9,6 +9,7 @@ import delight.scheduler.SequentialOperationScheduler
 import org.junit.Test
 
 class TestTimeoutAndResume {
+	
 	@Test
 	def void test() {
 		val scheduler = new SequentialOperationScheduler(this, ConcurrencyJre.create());
