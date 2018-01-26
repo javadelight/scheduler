@@ -105,10 +105,10 @@ public final class SequentialOperationScheduler {
 			}
 		}));
 		
-		int pending = scheduled.size();
-		if (pending > 400) {
-			Log.info(this, "Many operations pending for "+this.owner+": "+pending, Field.define("pendingOperations", ""+pending));
-		}
+//		int pending = scheduled.size();
+//		if (pending > 400) {
+//			Log.info(this, "Many operations pending for "+this.owner+": "+pending, Field.define("pendingOperations", ""+pending));
+//		}
 		
 		runIfRequired(enforceOwnThread);
 
