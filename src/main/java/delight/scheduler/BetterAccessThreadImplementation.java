@@ -1,5 +1,9 @@
 package delight.scheduler;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+
 import delight.async.callbacks.SimpleCallback;
 import delight.concurrency.Concurrency;
 import delight.concurrency.schedule.SingleInstanceThread;
@@ -9,10 +13,7 @@ import delight.concurrency.wrappers.SimpleAtomicBoolean;
 import delight.concurrency.wrappers.SimpleExecutor;
 import delight.concurrency.wrappers.SimpleLock;
 import delight.concurrency.wrappers.WhenExecutorShutDown;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
+import delight.simplelog.Log;
 
 public class BetterAccessThreadImplementation implements AccessThread {
 
@@ -36,7 +37,7 @@ public class BetterAccessThreadImplementation implements AccessThread {
     public void offer(final Step item) {
 
         if (isShutDown.get()) {
-            System.err.println(this + ": WARNING Trying to submit task for shutdown worker [" + item + "]");
+            Log.warn(this, "WARNING Trying to submit task for shutdown worker [" + item + "]");
             // new Exception("here").printStackTrace();
             item.process();
             return;
