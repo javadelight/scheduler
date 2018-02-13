@@ -8,7 +8,7 @@
 	<url>https://github.com/javadelight/scheduler</url>
 	<properties>
 
-		<module.gwtVersion>2.7.0</module.gwtVersion>
+		<module.gwtVersion>2.8.2</module.gwtVersion>
 		<module.draftCompile>true</module.draftCompile>
 		<module.importedPackages>
 			org.junit,
