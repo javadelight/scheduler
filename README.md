@@ -43,3 +43,18 @@ scheduler.shutdown(new ValueCallback<Success>() {
 });
 
 ```
+
+## Maven Dependency
+
+```xml
+<dependency>
+    <groupId>org.javadelight</groupId>
+	<artifactId>delight-scheduler</artifactId>
+	<version>[latest version]</version>
+</dependency>
+```
+
+This artifact is available on [Maven Central](https://search.maven.org/#search%7Cga%7C1%7Cdelight-scheduler) and 
+[BinTray](https://bintray.com/javadelight/javadelight/delight-scheduler).
+
+[![Maven Central](https://img.shields.io/maven-central/v/org.javadelight/delight-scheduler.svg)](https://search.maven.org/#search%7Cga%7C1%7Cdelight-scheduler)
